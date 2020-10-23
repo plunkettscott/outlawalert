@@ -35,9 +35,13 @@ AddEventHandler('outlawToggled', function()
 end)
 
 function Notify(text)
-    SetNotificationTextEntry('STRING')
-    AddTextComponentString(text)
-    DrawNotification(false, false)
+    TriggerClientEvent("chat:addMessage", -1, {
+        args = {
+            "~r~Dispatcher",
+            text
+        },
+        color = { 255, 255, 255 }
+    })
 end
 
 Citizen.CreateThread(function()
