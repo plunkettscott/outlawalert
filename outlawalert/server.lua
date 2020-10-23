@@ -51,3 +51,10 @@ RegisterServerEvent('meleeInProgressPos')
 AddEventHandler('meleeInProgressPos', function(mx, my, mz)
 	TriggerClientEvent('meleePlace', -1, mx, my, mz)
 end)
+
+RegisterCommand("outlaw", function(source, args, rawCommand)
+    -- If the source is > 0, then that means it must be a player.
+    if (source > 0) then
+		TriggerClientEvent('outlawToggled', source)
+    end
+end, false)

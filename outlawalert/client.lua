@@ -11,32 +11,27 @@ local blipJackingTime = 10 -- in second
 
 local origin = false --Don't touche it
 local timing = timer * 60000 --Don't touche it
+local isActive = false
 
-local PedModels = {
-        "s_m_y_cop_01",
-        's_m_m_snowcop_01',
-        's_m_y_hwaycop_01',
-        's_f_y_cop_01',
-        's_m_y_sheriff_01',
-        's_m_y_ranger_01',
-        's_m_m_armoured_01',
-        's_m_m_armoured_01',
-        's_f_y_sheriff_01',
-        's_f_y_ranger_01',
-        --'s_m_m_ciasec_01',
-        --'s_m_m_armoured_01',
-        --'s_m_m_armoured_02',
-        --'u_m_m_fibarchitect',
-        --'s_m_y_swat_01',
-    }
+
 GetPlayerName()
 RegisterNetEvent('outlawNotify')
 AddEventHandler('outlawNotify', function(alert)
-    for i = 0, #PedModels do
-        if not origin and IsPedModel(GetPlayerPed(-1),GetHashKey(PedModels[i])) then
-            Notify(alert)
-        end
+    if not origin and isActive then
+        Notify(alert)
     end
+end)
+
+RegisterNetEvent('outlawToggled')
+AddEventHandler('outlawToggled', function()
+    isActive = !isActive
+
+    TriggerClientEvent("chat:addMessage", -1, {
+        args = {
+            "Outlaw alerts have been " .. (if isActive then "enabled" else "disabled" end) .. "."
+        },
+        color = { 5, 255, 255 }
+    })
 end)
 
 function Notify(text)
