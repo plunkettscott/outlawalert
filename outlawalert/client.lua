@@ -57,75 +57,69 @@ end)
 
 RegisterNetEvent('thiefPlace')
 AddEventHandler('thiefPlace', function(tx, ty, tz)
-    for i = 0, #PedModels do
-        if not origin and isActive then
-            if carJackingAlert then
-                local transT = 250
-                local thiefBlip = AddBlipForCoord(tx, ty, tz)
-                SetBlipSprite(thiefBlip,  10)
-                SetBlipColour(thiefBlip,  1)
+    if not origin and isActive then
+        if carJackingAlert then
+            local transT = 250
+            local thiefBlip = AddBlipForCoord(tx, ty, tz)
+            SetBlipSprite(thiefBlip,  10)
+            SetBlipColour(thiefBlip,  1)
+            SetBlipAlpha(thiefBlip,  transT)
+            SetBlipAsShortRange(thiefBlip,  1)
+            while transT ~= 0 do
+                Wait(blipJackingTime * 4)
+                transT = transT - 1
                 SetBlipAlpha(thiefBlip,  transT)
-                SetBlipAsShortRange(thiefBlip,  1)
-                while transT ~= 0 do
-                    Wait(blipJackingTime * 4)
-                    transT = transT - 1
-                    SetBlipAlpha(thiefBlip,  transT)
-                    if transT == 0 then
-                        SetBlipSprite(thiefBlip,  2)
-                        return end
-                end
-                
+                if transT == 0 then
+                    SetBlipSprite(thiefBlip,  2)
+                    return end
             end
+            
         end
     end
 end)
 
 RegisterNetEvent('gunshotPlace')
 AddEventHandler('gunshotPlace', function(gx, gy, gz)
-    for i = 0, #PedModels do
-        if not origin and isActive then
-            if gunshotAlert then
-                local transG = 250
-                local gunshotBlip = AddBlipForCoord(gx, gy, gz)
-                SetBlipSprite(gunshotBlip,  1)
-                SetBlipColour(gunshotBlip,  1)
+    if not origin and isActive then
+        if gunshotAlert then
+            local transG = 250
+            local gunshotBlip = AddBlipForCoord(gx, gy, gz)
+            SetBlipSprite(gunshotBlip,  1)
+            SetBlipColour(gunshotBlip,  1)
+            SetBlipAlpha(gunshotBlip,  transG)
+            SetBlipAsShortRange(gunshotBlip,  1)
+            while transG ~= 0 do
+                Wait(blipGunTime * 4)
+                transG = transG - 1
                 SetBlipAlpha(gunshotBlip,  transG)
-                SetBlipAsShortRange(gunshotBlip,  1)
-                while transG ~= 0 do
-                    Wait(blipGunTime * 4)
-                    transG = transG - 1
-                    SetBlipAlpha(gunshotBlip,  transG)
-                    if transG == 0 then
-                        SetBlipSprite(gunshotBlip,  2)
-                        return end
-                end
-               
+                if transG == 0 then
+                    SetBlipSprite(gunshotBlip,  2)
+                    return end
             end
+            
         end
     end
 end)
 
 RegisterNetEvent('meleePlace')
 AddEventHandler('meleePlace', function(mx, my, mz)
-   for i = 0, #PedModels do
-        if not origin and isActive then
-            if meleeAlert then
-                local transM = 250
-                local meleeBlip = AddBlipForCoord(mx, my, mz)
-                SetBlipSprite(meleeBlip,  270)
-                SetBlipColour(meleeBlip,  17)
-                SetBlipAlpha(meleeBlip,  transG)
-                SetBlipAsShortRange(meleeBlip,  1)
-                while transM ~= 0 do
-                    Wait(blipMeleeTime * 4)
-                    transM = transM - 1
-                    SetBlipAlpha(meleeBlip,  transM)
-                    if transM == 0 then
-                        SetBlipSprite(meleeBlip,  2)
-                        return end
-                end
-                
+    if not origin and isActive then
+        if meleeAlert then
+            local transM = 250
+            local meleeBlip = AddBlipForCoord(mx, my, mz)
+            SetBlipSprite(meleeBlip,  270)
+            SetBlipColour(meleeBlip,  17)
+            SetBlipAlpha(meleeBlip,  transG)
+            SetBlipAsShortRange(meleeBlip,  1)
+            while transM ~= 0 do
+                Wait(blipMeleeTime * 4)
+                transM = transM - 1
+                SetBlipAlpha(meleeBlip,  transM)
+                if transM == 0 then
+                    SetBlipSprite(meleeBlip,  2)
+                    return end
             end
+            
         end
     end
 end)
