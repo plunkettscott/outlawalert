@@ -9,6 +9,15 @@ local blipMeleeTime = 2 --in second
 local blipJackingTime = 10 -- in second
 --End config
 
+local gunShotDelay = {5000, 9000} -- min delay, max delay
+local gunShotFrozenFor = 30
+
+local meleeDelay = {5000, 9000} -- min delay, max delay
+local meleeFrozenFor = 30
+
+local vehicleTheftDelay = {3000, 3000} -- min delay, max delay
+local vehicleFrozenFor = 3
+
 local origin = false --Don't touche it
 local timing = timer * 60000 --Don't touche it
 local isActive = false
@@ -26,22 +35,24 @@ RegisterNetEvent('outlawToggled')
 AddEventHandler('outlawToggled', function()
     isActive = not isActive
 
-    TriggerClientEvent("chat:addMessage", -1, {
-        args = {
-            "Outlaw alerts have been " .. (if isActive then "enabled" else "disabled" end) .. "."
-        },
-        color = { 5, 255, 255 }
+    local status = "enabled"
+    if not isActive then
+        status = "disabled"
+    end
+
+    TriggerEvent('chat:addMessage', {
+      color = { 255, 0, 0 },
+      multiline = true,
+      args = {"Notice", "Outlaw alerts have been " .. status .. "."}
     })
 end)
 
 function Notify(text)
-    TriggerClientEvent("chat:addMessage", -1, {
-        args = {
-            "~r~Dispatcher",
-            text
-        },
-        color = { 255, 255, 255 }
-    })
+    TriggerEvent('chat:addMessage', {
+        color = { 255, 0, 0},
+        multiline = true,
+        args = {"Dispatcher", text}
+      })
 end
 
 Citizen.CreateThread(function()
@@ -124,76 +135,33 @@ AddEventHandler('meleePlace', function(mx, my, mz)
     end
 end)
 
---Star color
---[[1- White
-2- Black
-3- Grey
-4- Clear grey
-5-
-6-
-7- Clear orange
-8-
-9-
-10-
-11-
-12- Clear blue]]
-
 Citizen.CreateThread( function()
     while true do
         Wait(0)
-        if showOutlaw then
-            for i = 0, 31 do
-                if DecorGetInt(GetPlayerPed(i), "IsOutlaw") == 2 and GetPlayerPed(i) ~= GetPlayerPed(-1) then
-                    gamerTagId = Citizen.InvokeNative(0xBFEFE3321A3F5015, GetPlayerPed(i), ".", false, false, "", 0 )
-                    Citizen.InvokeNative(0xCF228E2AA03099C3, gamerTagId, 0) --Show a star
-                    Citizen.InvokeNative(0x63BB75ABEDC1F6A0, gamerTagId, 7, true) --Active gamerTagId
-                    Citizen.InvokeNative(0x613ED644950626AE, gamerTagId, 7, 1) --White star
-                elseif DecorGetInt(GetPlayerPed(i), "IsOutlaw") == 1 then
-                    Citizen.InvokeNative(0x613ED644950626AE, gamerTagId, 7, 255) -- Set Color to 255
-                    Citizen.InvokeNative(0x63BB75ABEDC1F6A0, gamerTagId, 7, false) --Unactive gamerTagId
-                end
-            end
-        end
-    end
-end)
-
-Citizen.CreateThread( function()
-    while true do
-        Wait(0)
-        if DecorGetInt(GetPlayerPed(-1), "IsOutlaw") == 2 then
-            Wait( math.ceil(timing) )
-            DecorSetInt(GetPlayerPed(-1), "IsOutlaw", 1)
-        end
-    end
-end)
-
-Citizen.CreateThread( function()
-    while true do
         if not isActive then
-            Wait(0)
             local plyPos = GetEntityCoords(GetPlayerPed(-1),  true)
             local s1, s2 = Citizen.InvokeNative( 0x2EB41072B4C1E4C0, plyPos.x, plyPos.y, plyPos.z, Citizen.PointerValueInt(), Citizen.PointerValueInt() )
             local street1 = GetStreetNameFromHashKey(s1)
             local street2 = GetStreetNameFromHashKey(s2)
             if IsPedTryingToEnterALockedVehicle(GetPlayerPed(-1)) or IsPedJacking(GetPlayerPed(-1)) then
                 origin = true
+                Wait(math.random(vehicleTheftDelay[1], vehicleTheftDelay[2]))
+
                 DecorSetInt(GetPlayerPed(-1), "IsOutlaw", 2)
-                local male = IsPedMale(GetPlayerPed(-1))
-                if male then
-                    sex = "men"
-                elseif not male then
-                    sex = "women"
-                end
                 TriggerServerEvent('thiefInProgressPos', plyPos.x, plyPos.y, plyPos.z)
+
                 local veh = GetVehiclePedIsTryingToEnter(GetPlayerPed(-1))
                 local vehName = GetDisplayNameFromVehicleModel(GetEntityModel(veh))
                 local vehName2 = GetLabelText(vehName)
+                local vehplate = GetVehicleNumberPlateText(veh)
+                
                 if s2 == 0 then
-                    TriggerServerEvent('thiefInProgressS1', street1, vehName2, sex)
+                    TriggerServerEvent('thiefInProgressS1', street1, vehName2, vehplate)
                 elseif s2 ~= 0 then
-                    TriggerServerEvent('thiefInProgress', street1, street2, vehName2, sex)
+                    TriggerServerEvent('thiefInProgress', street1, street2, vehName2, vehplate)
                 end
-                Wait(5000)
+
+                Wait(vehicleFrozenFor * 1000)
                 origin = false
             end
         end
@@ -202,14 +170,16 @@ end)
 
 Citizen.CreateThread( function()
     while true do
+        Wait(0)
         if not isActive then
-            Wait(0)
             local plyPos = GetEntityCoords(GetPlayerPed(-1),  true)
             local s1, s2 = Citizen.InvokeNative( 0x2EB41072B4C1E4C0, plyPos.x, plyPos.y, plyPos.z, Citizen.PointerValueInt(), Citizen.PointerValueInt() )
             local street1 = GetStreetNameFromHashKey(s1)
             local street2 = GetStreetNameFromHashKey(s2)
             if IsPedInMeleeCombat(GetPlayerPed(-1)) then 
                 origin = true
+                Wait(math.random(meleeDelay[1], meleeDelay[2]))
+
                 DecorSetInt(GetPlayerPed(-1), "IsOutlaw", 2)
                 local male = IsPedMale(GetPlayerPed(-1))
                 if male then
@@ -217,13 +187,15 @@ Citizen.CreateThread( function()
                 elseif not male then
                     sex = "women"
                 end
+
                 TriggerServerEvent('meleeInProgressPos', plyPos.x, plyPos.y, plyPos.z)
                 if s2 == 0 then
                     TriggerServerEvent('meleeInProgressS1', street1, sex)
                 elseif s2 ~= 0 then
                     TriggerServerEvent("meleeInProgress", street1, street2, sex)
                 end
-                Wait(3000)
+
+                Wait(meleeFrozenFor * 1000)
                 origin = false
             end
         end
@@ -232,14 +204,17 @@ end)
 
 Citizen.CreateThread( function()
     while true do
+        Wait(0)
+
         if not isActive then
-            Wait(0)
             local plyPos = GetEntityCoords(GetPlayerPed(-1),  true)
             local s1, s2 = Citizen.InvokeNative( 0x2EB41072B4C1E4C0, plyPos.x, plyPos.y, plyPos.z, Citizen.PointerValueInt(), Citizen.PointerValueInt() )
             local street1 = GetStreetNameFromHashKey(s1)
             local street2 = GetStreetNameFromHashKey(s2)
             if IsPedShooting(GetPlayerPed(-1)) then
                 origin = true
+                Wait(math.random(gunShotDelay[1], gunShotDelay[2]))
+
                 DecorSetInt(GetPlayerPed(-1), "IsOutlaw", 2)
                 local male = IsPedMale(GetPlayerPed(-1))
                 if male then
@@ -253,7 +228,8 @@ Citizen.CreateThread( function()
                 elseif s2 ~= 0 then
                     TriggerServerEvent("gunshotInProgress", street1, street2, sex)
                 end
-                Wait(3000)
+
+                Wait(gunShotFrozenFor * 1000)
                 origin = false
             end
         end
