@@ -24,7 +24,7 @@ end)
 
 RegisterNetEvent('outlawToggled')
 AddEventHandler('outlawToggled', function()
-    isActive = !isActive
+    isActive = not isActive
 
     TriggerClientEvent("chat:addMessage", -1, {
         args = {
